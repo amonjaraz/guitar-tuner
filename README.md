@@ -5,4 +5,6 @@ Purpose: This project was created to detect pitch from musical instruments. The 
 
 How it works: The app receives input from a microphone and applies an autocorrelation function to detect the input sound's harmonic period. Using this period, we are able to find frequency knowing that Frequency = 1/Period . 
 
-Summary: A pitch detection app running on the web that is capable of tuning musical instruments! 
+
+
+Summary: A pitch detection app running on the web that is capable of tuning musical instruments. It currently only work on desktop/laptop computers.
