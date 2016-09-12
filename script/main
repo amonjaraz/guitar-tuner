@@ -1,6 +1,0 @@
-navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia);
-
-				if(navigator.getUserMedia){
-					console.log("getUserMedia Works");
-					navigator.getUserMedia({video: false, audio: true},callback, callbackError);
-				}
