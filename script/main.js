@@ -4,12 +4,12 @@ var noteElement = document.getElementById("noteName");
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext('2d');
 ctx.fillStyle = "white";
-ctx.fillRect(0,0,1024,500);
+ctx.fillRect(0,0,1024,300);
 
-var canvastwo = document.getElementById("myCanvasTwo");
+/*var canvastwo = document.getElementById("myCanvasTwo");
 var ctxtwo = canvastwo.getContext('2d');
 ctxtwo.fillStyle = "white";
-ctxtwo.fillRect(0,0,512,500);
+ctxtwo.fillRect(0,0,512,500);*/
 
 navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia);
 
@@ -69,15 +69,15 @@ function PitchDetect(stream){
         firstHarmonic = firstMinPos(AMDFmin, AMDFArray, freqGuess);
         frequencyVals.push(firstHarmonic);
         window.requestAnimationFrame(function(){ draw(dataArray, ctx, "red", false)});
-        window.requestAnimationFrame(function(){ draw(AMDFArray, ctxtwo, "red", true)});
+        //window.requestAnimationFrame(function(){ draw(AMDFArray, ctxtwo, "red", true)}); // AMDF Visual
 
         if(counter ===30){
 	        	freqGuess = ss.mode(frequencyVals);
 	        	freqAvg = avgFreq(frequencyVals, freqGuess);
-	        	freqHz = mySampleRate/freqAvg;
+	        	freqHz = Math.floor(mySampleRate/freqAvg);
 				note = getNote(freqHz);
 				noteElement.innerHTML = "Note:  " + note + " Freq: " + freqHz;
-				window.requestAnimationFrame(function(){ draw(AMDFArray, ctxtwo, "blue", true)});
+				//window.requestAnimationFrame(function(){ draw(AMDFArray, ctxtwo, "blue", true)});
 				counter=0;
 				frequencyVals=[];
 		}

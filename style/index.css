@@ -1,5 +1,18 @@
 #noteName {
-	font-size: 20px;
-	text-align: left;
+	font-size: 50px;
+	text-align: center;
+	font-style: bold;
 
+}
+.canvas {
+	margin: auto;
+	
+    border: 3px solid black;
+    padding: 10px;
+    width :1026px;
+    height:300px;
+}
+#projectLink {
+	text-align: center;
+	font-style: bold;
 }
