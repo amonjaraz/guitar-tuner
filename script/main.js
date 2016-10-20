@@ -91,9 +91,9 @@ function PitchDetect(stream){
 
 //Get the name of the note that corresponds to the calculated frequency.
 function getNote(frequencyHz, sampleRate){
-
+		
 		var noteList = ["A","A#","B","C","C#","D","D#","E","F","F#","G","G#"];
-		var noteNumber = Math.round(12*Math.log2(frequencyHz/(sampleRate/100))+49);
+		var noteNumber = Math.round(12*Math.log2(frequencyHz/440)+49);
 		var octaveLevel = ( ((noteNumber-3)/12)%1 === 0 ) ? (noteNumber-3)/12 : Math.ceil((noteNumber-3)/12);
 		var noteIndex = Math.round( (((noteNumber-1)/12)%1)*12) ;
 		var note = noteList[noteIndex] + octaveLevel;
