@@ -11,8 +11,8 @@ var ctxtwo = canvastwo.getContext('2d');
 ctxtwo.fillStyle = "white";
 ctxtwo.fillRect(0,0,512,500);*/
 
+//Prompt User for permission to use microphone
 navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia);
-
 if(navigator.getUserMedia){
 	navigator.getUserMedia({video: false, audio: true},PitchDetect, CallbackError);
 }else{
@@ -22,22 +22,24 @@ function CallbackError(e){
 	console.log("Error: " + e);
 }
 function PitchDetect(stream){
+	//Set up Audio Context
 	var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 	var gainNode = audioCtx.createGain();
 	var biquadFilter = audioCtx.createBiquadFilter();
 	var analyser = audioCtx.createAnalyser();
 	var javascriptNode = audioCtx.createScriptProcessor(1024, 1, 1);
-
+	
+	//Node Settings
 	gainNode.gain.value = 5;
 
 	biquadFilter.type = "lowpass";
 	biquadFilter.frequency.value = 1500;
 
-	analyser.fftSize = 2048;
 	analyser.minDecibels = -90;
 	analyser.maxDecibels = -10;
 	analyser.smoothingTimeConstant = 0.85;
 
+	//Link nodes
 	window.sourceNode = audioCtx.createMediaStreamSource(stream);
 	sourceNode.connect(gainNode);
 	gainNode.connect(biquadFilter);
@@ -49,13 +51,14 @@ function PitchDetect(stream){
 	var bufferLength = analyser.frequencyBinCount;
 	var dataArray = new Uint8Array(bufferLength);
 
-	var frequencyVals = [];
-	var freqGuess = 100;
-	var freqAvg = 0;
-	var AMDFArray = [];
-	var AMDFmin = []; // Array to store minimum AMDF values
-	var firstHarmonic;
-	var note;
+	//Variables
+	var frequencyVals = [];  //Variable that stores the harmonic frequency values every time an array of audio data is analyzed.
+	var freqGuess     = 100; //Initial guess of the harmonic frequency, this value also is recalculated as the most common value in 'frequencyVals'
+	var freqAvg       = 0; 	 //Variable that holds a closer estimate to the actual frequency.
+	var AMDFArray     = [];	 //(AutoSquaredMeanDifferenceFunction). Holds the ASMDF values where each index represent time
+	var AMDFmin       = [];  //Array to store minimum AMDF values
+	var firstHarmonic;       //The fundamental frequency will be the lowest of the harmonics
+	var note;				 //The letter representation of the frequency
 
 	// setup the event handler that is triggered every time enough samples have been collected
     // trigger the audio analysis and draw the results
@@ -69,13 +72,13 @@ function PitchDetect(stream){
         firstHarmonic = firstMinPos(AMDFmin, AMDFArray, freqGuess);
         frequencyVals.push(firstHarmonic);
         window.requestAnimationFrame(function(){ draw(dataArray, ctx, "red", false)});
-        //window.requestAnimationFrame(function(){ draw(AMDFArray, ctxtwo, "red", true)}); // AMDF Visual
+       // window.requestAnimationFrame(function(){ draw(AMDFArray, ctxtwo, "red", true)}); // AMDF Visual
 
         if(counter ===30){
 	        	freqGuess = ss.mode(frequencyVals);
 	        	freqAvg = avgFreq(frequencyVals, freqGuess);
 	        	freqHz = Math.floor(mySampleRate/freqAvg);
-				note = getNote(freqHz);
+				note = getNote(freqHz,mySampleRate);
 				noteElement.innerHTML = "Note:  " + note + " Freq: " + freqHz;
 				//window.requestAnimationFrame(function(){ draw(AMDFArray, ctxtwo, "blue", true)});
 				counter=0;
@@ -84,17 +87,19 @@ function PitchDetect(stream){
 		counter += 1;
 	}
 
-}
+}//end PitchDetect()
 
-function getNote(frequencyHz){
+//Get the name of the note that corresponds to the calculated frequency.
+function getNote(frequencyHz, sampleRate){
 
 		var noteList = ["A","A#","B","C","C#","D","D#","E","F","F#","G","G#"];
-		var noteNumber = Math.round(12*Math.log2(frequencyHz/440)+49);
+		var noteNumber = Math.round(12*Math.log2(frequencyHz/sampleRate)+49);
 		var octaveLevel = ( ((noteNumber-3)/12)%1 === 0 ) ? (noteNumber-3)/12 : Math.ceil((noteNumber-3)/12);
 		var noteIndex = Math.round( (((noteNumber-1)/12)%1)*12) ;
 		var note = noteList[noteIndex] + octaveLevel;
 	return note;
-}
+}//end getNote()
+
 //draw on canvas the magnitude of the sound vs time
 function draw(array, context, color, withBars){
 	var N = array.length;
@@ -116,6 +121,7 @@ function draw(array, context, color, withBars){
 
 } // end Draw() 
 
+//Calculate the autocorrelation function using the audio data.
 function amdf(dataArray, bufferLength, freqGuess){
 	var m = 100; // length of array to analyze, N + m <= bufferLength, otherwise it will be out of bounds
 	var N = bufferLength - m; // maximum phase shift, determines lowest frequency detectable (Fmin = SampleFrequency/N) 
@@ -133,6 +139,8 @@ function amdf(dataArray, bufferLength, freqGuess){
 	return AMDFvalues;
 
 }// end amdf()
+
+//Find the average frequency from the 'real values' using the most common of those values.
 function avgFreq(array, meanGuess){
 	var sum=0;
 	var average = 0;
@@ -147,9 +155,10 @@ function avgFreq(array, meanGuess){
 	return Math.floor(average);
 
 }//end avgFreq()
-				
+
+//Determine minimums in the array based on slope change				
 function findMin(array){
-	//determine minimums in the array based on slope change
+
 	var arrayMinX = [];
 
 	for(var i=0; i<array.length; i++){
@@ -170,6 +179,8 @@ function findMin(array){
 	return arrayMinX;
 }
 
+//Find most likely position of the fundamental frequency. This is accomplished by comparing the minimum AMDF values to see which one is the lowest amplitude
+//and lowest frequency.
 function firstMinPos(arrayX, arrayY, freqGuess){
 	var errorFactor=20;
 	var newFreq = true;
