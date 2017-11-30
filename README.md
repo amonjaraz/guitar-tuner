@@ -7,4 +7,4 @@ How it works: The app receives input from a microphone and applies an autocorrel
 
 
 
-Summary: A pitch detection app running on the web that is capable of tuning musical instruments. It currently only work on desktop/laptop computers.
+Summary: A pitch detection app running on the web that is capable of tuning musical instruments. It currently only works on desktop/laptop computers.
